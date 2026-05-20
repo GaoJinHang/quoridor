@@ -1,0 +1,648 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>步步为营</title>
+
+<style>
+body{
+  margin:0;
+  font-family:system-ui;
+  background:#e6d8bd;
+  display:flex;
+  justify-content:center;
+}
+
+#app{
+  width:100%;
+  max-width:640px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding:10px;
+}
+
+#title{font-size:22px;font-weight:700}
+#info{display:flex;gap:16px;font-weight:600;font-size:14px}
+#game{display:flex;flex-direction:column;gap:14px;align-items:center}
+
+#board{
+  width:95vw;
+  max-width:560px;
+  aspect-ratio:1;
+  display:grid;
+
+  grid-template-columns:
+    1fr 0.18fr 1fr 0.18fr 1fr 0.18fr 1fr 0.18fr 1fr
+    0.18fr 1fr 0.18fr 1fr 0.18fr 1fr 0.18fr 1fr;
+
+  grid-template-rows:
+    1fr 0.18fr 1fr 0.18fr 1fr 0.18fr 1fr 0.18fr 1fr
+    0.18fr 1fr 0.18fr 1fr 0.18fr 1fr 0.18fr 1fr;
+
+  background:#6b4f2a;
+  padding:6px;
+  border-radius:14px;
+}
+
+.edge-h,.edge-v,.intersection{position:relative}
+.cell{background:#f6f1e7;border-radius:6px;position:relative}
+
+.edge-h::before,.edge-v::before{
+  content:"";
+  position:absolute;
+  background:rgba(0,0,0,.15);
+}
+
+.edge-h::before{
+  width:100%;
+  height:8%;
+  top:46%;
+  border-radius:6px;
+}
+
+.edge-v::before{
+  height:100%;
+  width:8%;
+  left:46%;
+  border-radius:6px;
+}
+
+.intersection{pointer-events:none}
+
+.p1,.p2,.preview-piece{
+  position:absolute;
+  width:70%;
+  height:70%;
+  top:15%;
+  left:15%;
+  border-radius:50%;
+}
+
+.p1{background:#42a5f5}
+.p2{background:#ef5350}
+.preview-piece{opacity:.4}
+
+/* ===== 墙连续渲染 ===== */
+
+.wall{
+  position:absolute;
+  inset:0;
+}
+
+.edge-h .wall.start{
+  border-top-left-radius:8px;
+  border-bottom-left-radius:8px;
+}
+.edge-h .wall.middle{
+  border-radius:0;
+  margin-left:-1px;
+  margin-right:-1px;
+}
+.edge-h .wall.end{
+  border-top-right-radius:8px;
+  border-bottom-right-radius:8px;
+}
+
+.edge-v .wall.start{
+  border-top-left-radius:8px;
+  border-top-right-radius:8px;
+}
+.edge-v .wall.middle{
+  border-radius:0;
+  margin-top:-1px;
+  margin-bottom:-1px;
+}
+.edge-v .wall.end{
+  border-bottom-left-radius:8px;
+  border-bottom-right-radius:8px;
+}
+
+.wall.blue{background:#1e88e5}
+.wall.red{background:#c62828}
+.wall.preview{opacity:.4}
+
+.highlight{background:#cdeffd!important}
+
+#side{
+  width:95vw;
+  max-width:560px;
+  display:flex;
+  gap:8px;
+}
+
+#side button{
+  flex:1;
+  padding:12px 0;
+  border-radius:10px;
+  border:none;
+  font-size:14px;
+}
+
+#confirmBtn{background:#333;color:#fff;opacity:.3}
+#confirmBtn.enabled{opacity:1}
+</style>
+
+<style>
+html,body{
+  touch-action:manipulation;
+}
+</style>
+
+</head>
+<body>
+
+<div id="app">
+  <div id="title">步步为营</div>
+  <div id="info">
+    <div id="turn"></div>
+    <div id="wallsInfo"></div>
+  </div>
+
+  <div id="game">
+    <div id="board"></div>
+    <div id="side">
+      <button id="confirmBtn">确认</button>
+      <button onclick="undo()">悔棋</button>
+      <button onclick="redo()">撤销悔棋</button>
+      <button onclick="resetGame()">重新开始</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const boardEl=document.getElementById("board");
+const confirmBtn=document.getElementById("confirmBtn");
+const turnEl=document.getElementById("turn");
+const wallsEl=document.getElementById("wallsInfo");
+
+let currentPlayer=1;
+let players={1:{x:4,y:8},2:{x:4,y:0}};
+let walls={h:new Map(),v:new Map()};
+let wallsLeft={1:10,2:10};
+const past=[],future=[];
+let gameOver=false;
+
+let previewMove=null,previewWall=null;
+let legalMoves=[],legalWalls=new Set();
+
+function isOccupied(x,y){
+  const o=players[3-currentPlayer];
+  return o.x===x&&o.y===y;
+}
+
+function autoShowMoves(){
+  clearHighlights();
+  legalMoves=[];
+  const me=players[currentPlayer];
+  const opp=players[3-currentPlayer];
+  const dirs=[[0,1],[0,-1],[1,0],[-1,0]];
+
+  dirs.forEach(([dx,dy])=>{
+    const nx=me.x+dx,ny=me.y+dy;
+    if(nx<0||ny<0||nx>8||ny>8)return;
+    if(blocked(me.x,me.y,nx,ny))return;
+
+    if(nx===opp.x&&ny===opp.y){
+      const bx=opp.x+dx,by=opp.y+dy;
+      const canJump=
+        bx>=0&&by>=0&&bx<=8&&by<=8 &&
+        !blocked(opp.x,opp.y,bx,by);
+
+      if(canJump){
+        addMove(bx,by);
+      }else{
+        const sides=dx===0?[[1,0],[-1,0]]:[[0,1],[0,-1]];
+        sides.forEach(([sx,sy])=>{
+          const tx=opp.x+sx,ty=opp.y+sy;
+          if(tx<0||ty<0||tx>8||ty>8)return;
+          if(blocked(opp.x,opp.y,tx,ty))return;
+          addMove(tx,ty);
+        });
+      }
+    }else if(!isOccupied(nx,ny)){
+      addMove(nx,ny);
+    }
+  });
+}
+
+function addMove(x,y){
+  legalMoves.push({x,y});
+  boardEl.children[(y*2)*17+(x*2)]
+    .classList.add("highlight");
+}
+
+function clearHighlights(){
+  boardEl.querySelectorAll(".highlight")
+    .forEach(e=>e.classList.remove("highlight"));
+}
+function setConfirm(e){
+  confirmBtn.classList.toggle("enabled",e);
+}
+
+confirmBtn.onclick=()=>{
+  if(gameOver)return;
+  if(previewMove)placeMove();
+  if(previewWall)placeWall();
+};
+
+function makeSnapshot(){
+  return{
+    currentPlayer,
+    players:JSON.parse(JSON.stringify(players)),
+    walls:{h:new Map(walls.h),v:new Map(walls.v)},
+    wallsLeft:JSON.parse(JSON.stringify(wallsLeft))
+  };
+}
+
+function applySnapshot(s){
+  currentPlayer=s.currentPlayer;
+  players=JSON.parse(JSON.stringify(s.players));
+  walls={h:new Map(s.walls.h),v:new Map(s.walls.v)};
+  wallsLeft=JSON.parse(JSON.stringify(s.wallsLeft));
+}
+
+function commit(){
+  past.push(makeSnapshot());
+  future.length=0;
+}
+
+function undo(){
+  if(gameOver)return;
+  if(!past.length)return;
+  future.push(makeSnapshot());
+  applySnapshot(past.pop());
+  clearPreview();
+  render();
+}
+
+function redo(){
+  if(gameOver)return;
+  if(!future.length)return;
+  past.push(makeSnapshot());
+  applySnapshot(future.pop());
+  clearPreview();
+  render();
+}
+
+function cellClick(x,y){
+  if(gameOver)return;
+  if(!legalMoves.some(m=>m.x===x&&m.y===y)){
+    setConfirm(false);
+    return;
+  }
+
+  clearPreview(false);
+  previewMove={x,y};
+
+  const i=(y*2)*17+(x*2);
+  const p=document.createElement("div");
+  p.className="preview-piece "+(currentPlayer===1?"p1":"p2");
+  boardEl.children[i].appendChild(p);
+
+  setConfirm(true);
+}
+
+function computeLegalWalls(){
+  legalWalls.clear();
+  for(let y=0;y<8;y++){
+    for(let x=0;x<8;x++){
+      if(canPlaceWall(x,y,true))
+        legalWalls.add(`${x},${y},h`);
+      if(canPlaceWall(x,y,false))
+        legalWalls.add(`${x},${y},v`);
+    }
+  }
+}
+
+function wallClick(gx,gy,h){
+  if(gameOver)return;
+  clearPreview(false);
+
+  const x=Math.floor((gx-1)/2);
+  const y=Math.floor((gy-1)/2);
+  const key=`${x},${y},${h?'h':'v'}`;
+
+  if(!legalWalls.has(key)){
+    setConfirm(false);
+    return;
+  }
+
+  previewWall={gx,gy,h};
+  drawPreviewWall(gx,gy,h);
+  setConfirm(true);
+}
+
+function placeMove(){
+  if(gameOver)return;
+  if(!previewMove)return;
+
+  commit();
+  players[currentPlayer]=previewMove;
+
+  // 清除预览，渲染最终落子局面
+  clearPreview();
+  render();
+
+  if(currentPlayer===1 && players[currentPlayer].y===0){
+    gameOver=true;
+    clearPreview();
+    clearHighlights();
+    render();
+    showWin(1);
+    return;
+  }
+  if(currentPlayer===2 && players[currentPlayer].y===8){
+    gameOver=true;
+    clearPreview();
+    clearHighlights();
+    render();
+    showWin(2);
+    return;
+  }
+
+  currentPlayer=3-currentPlayer;
+  render();
+}
+
+function placeWall(){
+  if(gameOver)return;
+  if(!previewWall)return;
+
+  const x=Math.floor((previewWall.gx-1)/2);
+  const y=Math.floor((previewWall.gy-1)/2);
+  const key=`${x},${y},${previewWall.h?'h':'v'}`;
+
+  if(!legalWalls.has(key))return;
+
+  commit();
+  (previewWall.h?walls.h:walls.v).set(x+","+y,currentPlayer);
+  wallsLeft[currentPlayer]--;
+
+  currentPlayer=3-currentPlayer;
+  clearPreview();
+  render();
+}
+
+function clearPreview(reset=true){
+  boardEl.querySelectorAll(".preview,.preview-piece")
+    .forEach(e=>e.remove());
+  previewMove=null;
+  previewWall=null;
+  if(reset)setConfirm(false);
+}
+
+function canPlaceWall(x,y,h){
+  if(x<0||y<0||x>=8||y>=8)return false;
+  if(wallsLeft[currentPlayer]<=0)return false;
+
+  const key=x+","+y;
+
+  if(h){
+    if(walls.h.has(key))return false;
+    if(walls.h.has((x-1)+","+y))return false;
+    if(walls.h.has((x+1)+","+y))return false;
+    if(walls.v.has(key))return false;
+  }else{
+    if(walls.v.has(key))return false;
+    if(walls.v.has(x+","+(y-1)))return false;
+    if(walls.v.has(x+","+(y+1)))return false;
+    if(walls.h.has(key))return false;
+  }
+
+  const bh=new Map(walls.h);
+  const bv=new Map(walls.v);
+
+  (h?walls.h:walls.v).set(key,1);
+
+  const ok=hasPath(1)&&hasPath(2);
+
+  walls.h=bh;
+  walls.v=bv;
+
+  return ok;
+}
+
+function hasPath(pid){
+  const start=players[pid];
+  const goalY=pid===1?0:8;
+
+  const q=[[start.x,start.y]];
+  const vis=new Set([start.x+","+start.y]);
+
+  while(q.length){
+    const [x,y]=q.shift();
+    if(y===goalY)return true;
+
+    [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dx,dy])=>{
+      const nx=x+dx,ny=y+dy;
+      if(nx<0||ny<0||nx>8||ny>8)return;
+      if(blocked(x,y,nx,ny))return;
+
+      const k=nx+","+ny;
+      if(vis.has(k))return;
+
+      vis.add(k);
+      q.push([nx,ny]);
+    });
+  }
+  return false;
+}
+
+function blocked(x1,y1,x2,y2){
+  if(x1===x2){
+    const y=Math.min(y1,y2);
+    return walls.h.has(x1+","+y)||
+           walls.h.has((x1-1)+","+y);
+  }
+  if(y1===y2){
+    const x=Math.min(x1,x2);
+    return walls.v.has(x+","+y1)||
+           walls.v.has(x+","+(y1-1));
+  }
+  return false;
+}
+function drawPreviewWall(gx,gy,h){
+  const x=Math.floor((gx-1)/2);
+  const y=Math.floor((gy-1)/2);
+  const color=currentPlayer===1?"blue":"red";
+
+  const cells=h
+    ?[(y*2+1)*17+(x*2),
+      (y*2+1)*17+(x*2+1),
+      (y*2+1)*17+(x*2+2)]
+    :[(y*2)*17+(x*2+1),
+      (y*2+1)*17+(x*2+1),
+      (y*2+2)*17+(x*2+1)];
+
+  cells.forEach((i,idx)=>{
+    const w=document.createElement("div");
+    w.className=`wall preview ${color} ${
+      idx===0?'start':
+      idx===1?'middle':
+      'end'
+    }`;
+    boardEl.children[i].appendChild(w);
+  });
+}
+
+function drawWall(key,h,p){
+  const [x,y]=key.split(",").map(Number);
+  const color=p===1?"blue":"red";
+
+  const cells=h
+    ?[(y*2+1)*17+(x*2),
+      (y*2+1)*17+(x*2+1),
+      (y*2+1)*17+(x*2+2)]
+    :[(y*2)*17+(x*2+1),
+      (y*2+1)*17+(x*2+1),
+      (y*2+2)*17+(x*2+1)];
+
+  cells.forEach((i,idx)=>{
+    const w=document.createElement("div");
+    w.className=`wall ${color} ${
+      idx===0?'start':
+      idx===1?'middle':
+      'end'
+    }`;
+    boardEl.children[i].appendChild(w);
+  });
+}
+
+function render(){
+  boardEl.querySelectorAll(".p1,.p2,.wall")
+    .forEach(e=>e.remove());
+
+  [1,2].forEach(p=>{
+    const i=(players[p].y*2)*17+(players[p].x*2);
+    const d=document.createElement("div");
+    d.className=p===1?"p1":"p2";
+    boardEl.children[i].appendChild(d);
+  });
+
+  walls.h.forEach((p,key)=>drawWall(key,true,p));
+  walls.v.forEach((p,key)=>drawWall(key,false,p));
+
+  turnEl.textContent=currentPlayer===1
+    ?"🔵 蓝方回合"
+    :"🔴 红方回合";
+
+  wallsEl.textContent=`墙：蓝 ${wallsLeft[1]} | 红 ${wallsLeft[2]}`;
+
+  if(!gameOver){
+    computeLegalWalls();
+    autoShowMoves();
+  }
+}
+
+function init(){
+  for(let y=0;y<17;y++){
+    for(let x=0;x<17;x++){
+      const d=document.createElement("div");
+
+      if(x%2===0 && y%2===0){
+        d.className="cell";
+        d.onclick=()=>cellClick(x/2,y/2);
+      }
+      else if(x%2===1 && y%2===1){
+        d.className="intersection";
+      }
+      else if(y%2===0){
+        d.className="edge-v";
+        d.onclick=()=>wallClick(x,y,false);
+      }
+      else{
+        d.className="edge-h";
+        d.onclick=()=>wallClick(x,y,true);
+      }
+
+      boardEl.appendChild(d);
+    }
+  }
+
+  render();
+}
+
+init();
+</script>
+
+<div id="winMask">
+  <div id="winPanel">
+    <div id="closeWin">✕</div>
+    <div id="winText"></div>
+    <button onclick="resetGame()">重新开始</button>
+  </div>
+</div>
+
+<style>
+#winMask{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.45);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
+#winPanel{
+  position:relative;
+  background:#fff;
+  padding:28px 32px 24px 32px;
+  border-radius:14px;
+  text-align:center;
+  min-width:220px;
+}
+#closeWin{
+  position:absolute;
+  top:8px;
+  right:12px;
+  cursor:pointer;
+  font-size:18px;
+}
+#winPanel button{
+  margin-top:16px;
+  padding:10px 20px;
+  border:none;
+  border-radius:8px;
+  font-size:15px;
+}
+</style>
+
+<script>
+
+function resetGame(){
+  currentPlayer=1;
+  players={1:{x:4,y:8},2:{x:4,y:0}};
+  walls={h:new Map(),v:new Map()};
+  wallsLeft={1:10,2:10};
+  past.length=0;
+  future.length=0;
+  previewMove=null;
+  previewWall=null;
+  legalMoves=[];
+  legalWalls=new Set();
+  gameOver=false;
+  document.getElementById("winMask").style.display="none";
+  clearPreview();
+  clearHighlights();
+  render();
+}
+
+function showWin(p){
+  document.getElementById("winText").textContent =
+    p===1 ? "🔵 蓝方胜利！" : "🔴 红方胜利！";
+  document.getElementById("winMask").style.display="flex";
+}
+
+document.addEventListener("click",function(e){
+  if(e.target.id==="closeWin"){
+    document.getElementById("winMask").style.display="none";
+    // 保持当前最终胜利局面，仅观察
+  }
+});
+</script>
+
+</body>
+</html>
