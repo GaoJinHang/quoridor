@@ -1234,8 +1234,14 @@
         }
 
         function showWin(p) {
-            document.getElementById("winText").textContent =
-                p === 1 ? "🔵 蓝方胜利！" : "🔴 红方胜利！";
+            const theme = document.body.dataset.theme || "classic";
+            let winText = '';
+            if (theme === 'ant') {
+                winText = p === 1 ? '🐜 血红林蚁（红蚁）胜利！' : '🐜 大阪举腹蚁（黄蚁）胜利！';
+            } else {
+                winText = p === 1 ? '🔵 蓝方胜利！' : '🔴 红方胜利！';
+            }
+            document.getElementById("winText").textContent = winText;
             document.getElementById("winMask").style.display = "flex";
         }
 
