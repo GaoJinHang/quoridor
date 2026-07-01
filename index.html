@@ -19,13 +19,45 @@
             max-width: 640px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
             padding: 10px;
+        }
+
+        /* ===== 顶部行：标题 + 信息 ===== */
+        #topRow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
         }
 
         #title {
             font-size: 22px;
-            font-weight: 700
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        #info {
+            display: flex;
+            gap: 14px;
+            font-weight: 600;
+            font-size: 14px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        #info>div {
+            white-space: nowrap;
+        }
+
+        /* ===== 第二行：皮肤 + 规则按钮 ===== */
+        #themeRow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
         }
 
         #themeWrap {
@@ -33,7 +65,7 @@
             align-items: center;
             gap: 6px;
             font-size: 14px;
-            font-weight: 600
+            font-weight: 600;
         }
 
         #themeSelect {
@@ -43,24 +75,35 @@
             background: #fff;
             font-size: 14px;
         }
-
         #themeSelect:disabled {
             opacity: .45;
             cursor: not-allowed;
         }
 
-        #info {
-            display: flex;
-            gap: 16px;
+        #rulesBtn {
+            padding: 6px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 0, 0, .2);
+            background: #fff;
+            font-size: 14px;
             font-weight: 600;
-            font-size: 14px
+            cursor: pointer;
+            transition: background 0.15s;
+            white-space: nowrap;
+        }
+        #rulesBtn:hover {
+            background: #f0ebe0;
+        }
+        #rulesBtn:active {
+            background: #ddd6c7;
         }
 
+        /* ===== 棋盘区域 ===== */
         #game {
             display: flex;
             flex-direction: column;
             gap: 14px;
-            align-items: center
+            align-items: center;
         }
 
         #board {
@@ -85,13 +128,13 @@
         .edge-h,
         .edge-v,
         .intersection {
-            position: relative
+            position: relative;
         }
 
         .cell {
             background: #f6f1e7;
             border-radius: 6px;
-            position: relative
+            position: relative;
         }
 
         .edge-h::before,
@@ -116,7 +159,7 @@
         }
 
         .intersection {
-            pointer-events: none
+            pointer-events: none;
         }
 
         .p1,
@@ -131,19 +174,18 @@
         }
 
         .p1 {
-            background: #42a5f5
+            background: #42a5f5;
         }
 
         .p2 {
-            background: #ef5350
+            background: #ef5350;
         }
 
         .preview-piece {
-            opacity: .4
+            opacity: .4;
         }
 
         /* ===== 墙连续渲染 ===== */
-
         .wall {
             position: absolute;
             inset: 0;
@@ -182,15 +224,15 @@
         }
 
         .wall.blue {
-            background: #1e88e5
+            background: #1e88e5;
         }
 
         .wall.red {
-            background: #c62828
+            background: #c62828;
         }
 
         .wall.preview {
-            opacity: .4
+            opacity: .4;
         }
 
         .highlight {
@@ -247,19 +289,19 @@
         }
 
         [data-theme="ant"] .ant-left {
-            transform: rotate(0deg)
+            transform: rotate(0deg);
         }
 
         [data-theme="ant"] .ant-right {
-            transform: rotate(180deg)
+            transform: rotate(180deg);
         }
 
         [data-theme="ant"] .ant-up {
-            transform: rotate(90deg)
+            transform: rotate(90deg);
         }
 
         [data-theme="ant"] .ant-down {
-            transform: rotate(-90deg)
+            transform: rotate(-90deg);
         }
 
         [data-theme="ant"] .p1::before,
@@ -293,32 +335,27 @@
         }
 
         /* --- 蚁窝皮肤 · 墙（无缝平滑版） --- */
-
-        /* 基础尺寸：让墙段覆盖单元格并略微延伸以消除间隙 */
-        [data-theme="ant"] .edge-h .wall {
+        [data-theme="ant"] .wall.wall-h {
             inset: 18% -2px 18% -2px;
         }
-        [data-theme="ant"] .edge-v .wall {
+        [data-theme="ant"] .wall.wall-v {
             inset: -2px 18% -2px 18%;
         }
 
-        /* 移除所有边框和轮廓，避免接缝处出现方形线条 */
         [data-theme="ant"] .wall.blue,
         [data-theme="ant"] .wall.red {
             outline: none !important;
             border: none !important;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, .35); /* 仅保留整体阴影，由父容器或统一阴影实现 */
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .35);
             filter: blur(.15px);
             mix-blend-mode: normal;
-            background: none; /* 背景由下面单独定义 */
+            background: none;
         }
 
-        /* 墙的颜色及纹理（连续渐变，三段拼接无痕） */
         [data-theme="ant"] .wall.blue {
             background:
                 repeating-linear-gradient(135deg, rgba(255, 255, 255, .28) 0 3px, transparent 3px 8px),
                 linear-gradient(135deg, #ff1744 0%, #ff5252 38%, #ff0033 64%, #ff6b81 100%);
-            /* 注意：三段背景独立，但颜色一致且延伸，拼接处由于重叠不会出现接缝 */
         }
 
         [data-theme="ant"] .wall.red {
@@ -327,36 +364,31 @@
                 linear-gradient(135deg, #fff176 0%, #ffeb3b 36%, #ffc400 66%, #fff59d 100%);
         }
 
-        /* 圆角控制：仅两端圆角，中间段无圆角，保证整体圆角矩形 */
-        [data-theme="ant"] .edge-h .wall.start {
+        [data-theme="ant"] .wall.wall-h.start {
             border-top-left-radius: 5px;
             border-bottom-left-radius: 5px;
         }
-        [data-theme="ant"] .edge-h .wall.end {
+        [data-theme="ant"] .wall.wall-h.end {
             border-top-right-radius: 5px;
             border-bottom-right-radius: 5px;
         }
-        [data-theme="ant"] .edge-h .wall.middle {
-            border-radius: 0;
-        }
-
-        [data-theme="ant"] .edge-v .wall.start {
+        [data-theme="ant"] .wall.wall-v.start {
             border-top-left-radius: 5px;
             border-top-right-radius: 5px;
         }
-        [data-theme="ant"] .edge-v .wall.end {
+        [data-theme="ant"] .wall.wall-v.end {
             border-bottom-left-radius: 5px;
             border-bottom-right-radius: 5px;
         }
-        [data-theme="ant"] .edge-v .wall.middle {
+        [data-theme="ant"] .wall.middle {
             border-radius: 0;
         }
 
-        /* 预览墙同样处理 */
         [data-theme="ant"] .wall.preview {
             opacity: .62;
         }
 
+        /* ===== 底部按钮 ===== */
         #side {
             width: 95vw;
             max-width: 560px;
@@ -370,23 +402,219 @@
             border-radius: 10px;
             border: none;
             font-size: 14px;
+            cursor: pointer;
+            background: #eee;
+            transition: background 0.15s;
+        }
+        #side button:hover {
+            background: #ddd;
+        }
+        #side button:active {
+            background: #ccc;
         }
 
         #confirmBtn {
             background: #333;
             color: #fff;
-            opacity: .3
+            opacity: .3;
+            cursor: default;
         }
-
         #confirmBtn.enabled {
-            opacity: 1
+            opacity: 1;
+            cursor: pointer;
         }
-    </style>
+        #confirmBtn.enabled:hover {
+            background: #222;
+        }
 
-    <style>
+        /* ===== 修复蚁窝皮肤下确认按钮的样式 ===== */
+        [data-theme="ant"] #confirmBtn {
+            background: #5a3d2b;
+            color: #b6a089;
+            opacity: 0.5;
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.2);
+            transition: all 0.15s;
+        }
+        [data-theme="ant"] #confirmBtn.enabled {
+            background: #c0392b;
+            color: #fff;
+            opacity: 1;
+            box-shadow: 0 2px 8px rgba(192, 57, 43, 0.5);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+        [data-theme="ant"] #confirmBtn.enabled:hover {
+            background: #e74c3c;
+            transform: scale(1.02);
+        }
+
+        /* ===== 胜利弹窗 ===== */
+        #winMask {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .45);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        #winPanel {
+            position: relative;
+            background: #fff;
+            padding: 28px 32px 24px 32px;
+            border-radius: 14px;
+            text-align: center;
+            min-width: 220px;
+            max-width: 90vw;
+        }
+
+        #closeWin {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            cursor: pointer;
+            font-size: 18px;
+            color: #888;
+            transition: color 0.15s;
+        }
+        #closeWin:hover {
+            color: #222;
+        }
+
+        #winPanel button {
+            margin-top: 16px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            cursor: pointer;
+            background: #333;
+            color: #fff;
+            transition: background 0.15s;
+        }
+        #winPanel button:hover {
+            background: #222;
+        }
+
+        /* ===== 规则弹窗 ===== */
+        #rulesMask {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .50);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9998;
+            padding: 16px;
+        }
+
+        #rulesPanel {
+            position: relative;
+            background: #fff;
+            padding: 28px 32px 24px 32px;
+            border-radius: 14px;
+            max-width: 520px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, .3);
+        }
+
+        #closeRules {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            cursor: pointer;
+            font-size: 20px;
+            color: #888;
+            transition: color 0.15s;
+        }
+        #closeRules:hover {
+            color: #222;
+        }
+
+        #rulesPanel h2 {
+            margin-top: 0;
+            margin-bottom: 14px;
+            font-size: 20px;
+            text-align: center;
+        }
+
+        #rulesContent {
+            font-size: 15px;
+            line-height: 1.7;
+            color: #222;
+        }
+
+        #rulesContent .rule-section {
+            margin-bottom: 12px;
+        }
+
+        #rulesContent .rule-section strong {
+            font-size: 16px;
+            display: inline-block;
+            margin-bottom: 2px;
+        }
+
+        #rulesContent .rule-section ul {
+            margin: 4px 0 8px 20px;
+            padding-left: 4px;
+        }
+
+        #rulesContent .rule-section li {
+            margin-bottom: 2px;
+        }
+
+        #rulesPanel .rules-close-btn {
+            display: block;
+            margin: 14px auto 0 auto;
+            padding: 10px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            cursor: pointer;
+            background: #333;
+            color: #fff;
+            transition: background 0.15s;
+        }
+        #rulesPanel .rules-close-btn:hover {
+            background: #222;
+        }
+
+        /* ===== 移动端优化 ===== */
         html,
         body {
             touch-action: manipulation;
+        }
+
+        @media (max-width: 480px) {
+            #title {
+                font-size: 18px;
+            }
+            #info {
+                font-size: 12px;
+                gap: 8px;
+            }
+            #themeWrap {
+                font-size: 12px;
+            }
+            #themeSelect {
+                font-size: 12px;
+                padding: 4px 8px;
+            }
+            #rulesBtn {
+                font-size: 12px;
+                padding: 4px 12px;
+            }
+            #rulesPanel {
+                padding: 20px 18px 18px 18px;
+            }
+            #rulesContent {
+                font-size: 14px;
+            }
+            #winPanel {
+                padding: 20px 18px 18px 18px;
+            }
         }
     </style>
 
@@ -394,19 +622,28 @@
 <body data-theme="classic">
 
     <div id="app">
-        <div id="title">步步为营</div>
-        <div id="themeWrap">
-            <label for="themeSelect">皮肤：</label>
-            <select id="themeSelect">
-                <option value="classic">经典版</option>
-                <option value="ant">如何回蚁窝</option>
-            </select>
-        </div>
-        <div id="info">
-            <div id="turn"></div>
-            <div id="wallsInfo"></div>
+        <!-- 第一行：标题 + 信息 -->
+        <div id="topRow">
+            <div id="title">步步为营</div>
+            <div id="info">
+                <div id="turn"></div>
+                <div id="wallsInfo"></div>
+            </div>
         </div>
 
+        <!-- 第二行：皮肤 + 规则按钮 -->
+        <div id="themeRow">
+            <div id="themeWrap">
+                <label for="themeSelect">皮肤：</label>
+                <select id="themeSelect">
+                    <option value="classic">经典版</option>
+                    <option value="ant">如何回蚁窝</option>
+                </select>
+            </div>
+            <button id="rulesBtn">📖 游戏规则</button>
+        </div>
+
+        <!-- 游戏区域 -->
         <div id="game">
             <div id="board"></div>
             <div id="side">
@@ -418,12 +655,76 @@
         </div>
     </div>
 
+    <!-- ===== 胜利弹窗 ===== -->
+    <div id="winMask">
+        <div id="winPanel">
+            <div id="closeWin">✕</div>
+            <div id="winText"></div>
+            <button onclick="resetGame()">重新开始</button>
+        </div>
+    </div>
+
+    <!-- ===== 规则弹窗 ===== -->
+    <div id="rulesMask">
+        <div id="rulesPanel">
+            <div id="closeRules">✕</div>
+            <h2>📖 游戏规则</h2>
+            <div id="rulesContent">
+                <div class="rule-section">
+                    <strong>🎯 目标</strong>
+                    <ul>
+                        <li><b>蓝方（🔵）</b>从底部出发，抵达 <b>顶部（第0行）</b> 即为胜利。</li>
+                        <li><b>红方（🔴）</b>从顶部出发，抵达 <b>底部（第8行）</b> 即为胜利。</li>
+                    </ul>
+                </div>
+
+                <div class="rule-section">
+                    <strong>🚶 移动</strong>
+                    <ul>
+                        <li>每回合将自己的棋子向 <b>上、下、左、右</b> 移动一格。</li>
+                        <li>不能穿越墙，也不能走到对方棋子所在的位置。</li>
+                    </ul>
+                </div>
+
+                <div class="rule-section">
+                    <strong>🦘 跳跃（吃子）</strong>
+                    <ul>
+                        <li>如果你的棋子与对方棋子 <b>相邻</b>，并且对方后方（沿你移动方向）<b>为空且无墙</b>，则可以 <b>跳跃</b> 到对方后方。</li>
+                        <li>如果对方后方被墙阻挡或超出棋盘，你可以选择跳到对方的 <b>左侧或右侧</b>（该位置需为空且无墙）。</li>
+                    </ul>
+                </div>
+
+                <div class="rule-section">
+                    <strong>🧱 墙</strong>
+                    <ul>
+                        <li>每方拥有 <b>10 面墙</b>，可以放置在两个格子之间的 <b>边缘</b> 上。</li>
+                        <li>放置墙后，必须确保 <b>双方都仍有</b> 通往各自目标行的路径。</li>
+                        <li>墙不能重叠放置，也不能阻断唯一通路。</li>
+                    </ul>
+                </div>
+
+                <div class="rule-section">
+                    <strong>🏆 胜负</strong>
+                    <ul>
+                        <li>先到达对方起始行的一方 <b>获胜</b>。</li>
+                        <li>游戏过程中可随时 <b>悔棋</b> 或 <b>重新开始</b>。</li>
+                    </ul>
+                </div>
+            </div>
+            <button class="rules-close-btn" onclick="closeRules()">我知道了</button>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
     <script>
         const boardEl = document.getElementById("board");
         const confirmBtn = document.getElementById("confirmBtn");
         const turnEl = document.getElementById("turn");
         const wallsEl = document.getElementById("wallsInfo");
         const themeSelect = document.getElementById("themeSelect");
+        const rulesBtn = document.getElementById("rulesBtn");
+        const rulesMask = document.getElementById("rulesMask");
+        const closeRulesBtn = document.getElementById("closeRules");
 
         let currentPlayer = 1;
         let players = { 1: { x: 4, y: 8 }, 2: { x: 4, y: 0 } };
@@ -440,6 +741,22 @@
         let legalMoves = [],
             legalWalls = new Set();
 
+        // ===== 规则弹窗控制 =====
+        function openRules() {
+            rulesMask.style.display = "flex";
+        }
+
+        function closeRules() {
+            rulesMask.style.display = "none";
+        }
+
+        rulesBtn.addEventListener("click", openRules);
+        closeRulesBtn.addEventListener("click", closeRules);
+        rulesMask.addEventListener("click", function(e) {
+            if (e.target === rulesMask) closeRules();
+        });
+
+        // ===== 主题控制 =====
         function updateThemeControl() {
             gameStarted = past.length > 0;
             if (themeSelect) {
@@ -447,7 +764,8 @@
             }
         }
 
-        function getMoveDirection(from, to, pid = currentPlayer) {
+        // ===== 方向辅助 =====
+        function getMoveDirection(from, to, pid) {
             const dx = to.x - from.x;
             const dy = to.y - from.y;
             if (dx !== 0 && Math.abs(dx) >= Math.abs(dy)) {
@@ -464,6 +782,7 @@
             return o.x === x && o.y === y;
         }
 
+        // ===== 移动高亮 =====
         function autoShowMoves() {
             clearHighlights();
             legalMoves = [];
@@ -534,6 +853,7 @@
             if (previewWall) placeWall();
         };
 
+        // ===== 快照 =====
         function makeSnapshot() {
             return {
                 currentPlayer,
@@ -577,6 +897,7 @@
             render();
         }
 
+        // ===== 点击交互 =====
         function cellClick(x, y) {
             if (gameOver) return;
             if (!legalMoves.some(m => m.x === x && m.y === y)) {
@@ -677,7 +998,8 @@
             render();
         }
 
-        function clearPreview(reset = true) {
+        function clearPreview(reset) {
+            if (reset === undefined) reset = true;
             boardEl.querySelectorAll(".preview,.preview-piece")
                 .forEach(e => e.remove());
             previewMove = null;
@@ -685,6 +1007,7 @@
             if (reset) setConfirm(false);
         }
 
+        // ===== 墙逻辑 =====
         function canPlaceWall(x, y, h) {
             if (x < 0 || y < 0 || x >= 8 || y >= 8) return false;
             if (wallsLeft[currentPlayer] <= 0) return false;
@@ -764,6 +1087,7 @@
             return false;
         }
 
+        // ===== 绘制墙 =====
         function drawPreviewWall(gx, gy, h) {
             const x = Math.floor((gx - 1) / 2);
             const y = Math.floor((gy - 1) / 2);
@@ -781,7 +1105,7 @@
 
             cells.forEach((i, idx) => {
                 const w = document.createElement("div");
-                w.className = `wall preview ${color} ${
+                w.className = `wall ${h ? "wall-h" : "wall-v"} preview ${color} ${
               idx===0?'start':
               idx===1?'middle':
               'end'
@@ -806,7 +1130,7 @@
 
             cells.forEach((i, idx) => {
                 const w = document.createElement("div");
-                w.className = `wall ${color} ${
+                w.className = `wall ${h ? "wall-h" : "wall-v"} ${color} ${
               idx===0?'start':
               idx===1?'middle':
               'end'
@@ -815,6 +1139,7 @@
             });
         }
 
+        // ===== 渲染 =====
         function render() {
             updateThemeControl();
             boardEl.querySelectorAll(".p1,.p2,.wall")
@@ -849,6 +1174,7 @@
             }
         }
 
+        // ===== 初始化棋盘 =====
         function init() {
             for (let y = 0; y < 17; y++) {
                 for (let x = 0; x < 17; x++) {
@@ -886,55 +1212,7 @@
             render();
         }
 
-        init();
-    </script>
-
-    <div id="winMask">
-        <div id="winPanel">
-            <div id="closeWin">✕</div>
-            <div id="winText"></div>
-            <button onclick="resetGame()">重新开始</button>
-        </div>
-    </div>
-
-    <style>
-        #winMask {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, .45);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-
-        #winPanel {
-            position: relative;
-            background: #fff;
-            padding: 28px 32px 24px 32px;
-            border-radius: 14px;
-            text-align: center;
-            min-width: 220px;
-        }
-
-        #closeWin {
-            position: absolute;
-            top: 8px;
-            right: 12px;
-            cursor: pointer;
-            font-size: 18px;
-        }
-
-        #winPanel button {
-            margin-top: 16px;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
-        }
-    </style>
-
-    <script>
+        // ===== 重置 & 胜利 =====
         function resetGame() {
             currentPlayer = 1;
             players = { 1: { x: 4, y: 8 }, 2: { x: 4, y: 0 } };
@@ -966,6 +1244,8 @@
                 document.getElementById("winMask").style.display = "none";
             }
         });
+
+        init();
     </script>
 
 </body>
