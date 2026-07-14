@@ -69,6 +69,7 @@
         }
 
         #themeSelect {
+            min-width: 142px;
             padding: 6px 10px;
             border-radius: 8px;
             border: 1px solid rgba(0, 0, 0, .2);
@@ -239,7 +240,7 @@
             background: #cdeffd !important;
         }
 
-        /* ===== 皮肤：如何回蚁窝 ===== */
+        /* ===== 皮肤：你该如何回蚁窝 ===== */
         [data-theme="ant"] #board {
             background: #8b6b4d;
             background-image:
@@ -267,27 +268,42 @@
             background: rgba(45, 28, 14, .28);
         }
 
+        /* ===== 使用图片替换蚂蚁 ===== */
         [data-theme="ant"] .p1,
         [data-theme="ant"] .p2 {
-            --ant-color: #c0392b;
-            --ant-dark: #6e1d14;
-            background:
-                radial-gradient(circle at 19% 44%, #111 0 4%, transparent 5%),
-                radial-gradient(circle at 19% 56%, #111 0 4%, transparent 5%),
-                radial-gradient(circle at 25% 50%, var(--ant-color) 0 15%, transparent 16%),
-                radial-gradient(ellipse at 51% 50%, var(--ant-color) 0 19%, transparent 20%),
-                radial-gradient(ellipse at 76% 50%, var(--ant-color) 0 22%, transparent 23%);
-            border-radius: 0;
+            background: transparent !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            filter: none !important;
+            width: 80% !important;
+            height: 80% !important;
+            top: 10% !important;
+            left: 10% !important;
             overflow: visible;
             z-index: 5;
-            filter: drop-shadow(0 2px 1px rgba(0, 0, 0, .28));
+            /* 确保图片铺满 */
+            background-size: contain !important;
+            background-repeat: no-repeat !important;
+            background-position: center !important;
+        }
+
+        [data-theme="ant"] .p1 {
+            background: url('red ant.png') !important;
         }
 
         [data-theme="ant"] .p2 {
-            --ant-color: #f1c40f;
-            --ant-dark: #9f7600;
+            background: url('yellow ant.png') !important;
         }
 
+        /* 隐藏伪元素（触角、眼睛等） */
+        [data-theme="ant"] .p1::before,
+        [data-theme="ant"] .p2::before,
+        [data-theme="ant"] .p1::after,
+        [data-theme="ant"] .p2::after {
+            display: none !important;
+        }
+
+        /* 蚂蚁朝向旋转 */
         [data-theme="ant"] .ant-left {
             transform: rotate(0deg);
         }
@@ -302,36 +318,6 @@
 
         [data-theme="ant"] .ant-down {
             transform: rotate(-90deg);
-        }
-
-        [data-theme="ant"] .p1::before,
-        [data-theme="ant"] .p2::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background:
-                linear-gradient(28deg, transparent 45%, var(--ant-dark) 47%, var(--ant-dark) 53%, transparent 55%) 9% 19%/24% 16% no-repeat,
-                linear-gradient(-28deg, transparent 45%, var(--ant-dark) 47%, var(--ant-dark) 53%, transparent 55%) 9% 65%/24% 16% no-repeat,
-                linear-gradient(58deg, transparent 46%, var(--ant-dark) 48%, var(--ant-dark) 52%, transparent 54%) 35% 9%/32% 22% no-repeat,
-                linear-gradient(-58deg, transparent 46%, var(--ant-dark) 48%, var(--ant-dark) 52%, transparent 54%) 35% 69%/32% 22% no-repeat,
-                linear-gradient(35deg, transparent 46%, var(--ant-dark) 48%, var(--ant-dark) 52%, transparent 54%) 60% 14%/34% 20% no-repeat,
-                linear-gradient(-35deg, transparent 46%, var(--ant-dark) 48%, var(--ant-dark) 52%, transparent 54%) 60% 66%/34% 20% no-repeat;
-            z-index: -1;
-        }
-
-        [data-theme="ant"] .p1::after,
-        [data-theme="ant"] .p2::after {
-            content: "";
-            position: absolute;
-            width: 26%;
-            height: 26%;
-            left: 1%;
-            top: 23%;
-            border-top: 2px solid var(--ant-dark);
-            border-left: 2px solid transparent;
-            border-radius: 50%;
-            transform: rotate(-20deg);
-            box-shadow: 4px 16px 0 -1px var(--ant-dark);
         }
 
         /* --- 蚁窝皮肤 · 墙（无缝平滑版） --- */
@@ -637,7 +623,7 @@
                 <label for="themeSelect">皮肤：</label>
                 <select id="themeSelect">
                     <option value="classic">经典版</option>
-                    <option value="ant">如何回蚁窝</option>
+                    <option value="ant">你该如何回蚁窝</option>
                 </select>
             </div>
             <button id="rulesBtn">📖 游戏规则</button>
