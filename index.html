@@ -268,42 +268,31 @@
             background: rgba(45, 28, 14, .28);
         }
 
-        /* ===== 使用图片替换蚂蚁 ===== */
         [data-theme="ant"] .p1,
         [data-theme="ant"] .p2 {
-            background: transparent !important;
-            border-radius: 0 !important;
-            box-shadow: none !important;
-            filter: none !important;
-            width: 80% !important;
-            height: 80% !important;
-            top: 10% !important;
-            left: 10% !important;
+            width: 96%;
+            height: 96%;
+            top: 2%;
+            left: 2%;
+            background-color: transparent;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: contain;
+            border-radius: 0;
             overflow: visible;
             z-index: 5;
-            /* 确保图片铺满 */
-            background-size: contain !important;
-            background-repeat: no-repeat !important;
-            background-position: center !important;
+            isolation: isolate;
+            filter: drop-shadow(0 2px 1px rgba(62, 36, 22, .34));
         }
 
         [data-theme="ant"] .p1 {
-            background: url('red ant.png') !important;
+            background-image: url("red ant.png");
         }
 
         [data-theme="ant"] .p2 {
-            background: url('yellow ant.png') !important;
+            background-image: url("yellow ant.png");
         }
 
-        /* 隐藏伪元素（触角、眼睛等） */
-        [data-theme="ant"] .p1::before,
-        [data-theme="ant"] .p2::before,
-        [data-theme="ant"] .p1::after,
-        [data-theme="ant"] .p2::after {
-            display: none !important;
-        }
-
-        /* 蚂蚁朝向旋转 */
         [data-theme="ant"] .ant-left {
             transform: rotate(0deg);
         }
@@ -319,6 +308,7 @@
         [data-theme="ant"] .ant-down {
             transform: rotate(-90deg);
         }
+
 
         /* --- 蚁窝皮肤 · 墙（无缝平滑版） --- */
         [data-theme="ant"] .wall.wall-h {
